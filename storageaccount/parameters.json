@@ -1,0 +1,51 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "westus2"
+        },
+        "storageAccountName": {
+            "value": "storageaccountabc01"
+        },
+        "accountType": {
+            "value": "Standard_GRS"
+        },
+        "kind": {
+            "value": "BlobStorage"
+        },
+        "accessTier": {
+            "value": "Hot"
+        },
+        "minimumTlsVersion": {
+            "value": "TLS1_2"
+        },
+        "supportsHttpsTrafficOnly": {
+            "value": true
+        },
+        "allowBlobPublicAccess": {
+            "value": true
+        },
+        "allowSharedKeyAccess": {
+            "value": true
+        },
+        "networkAclsBypass": {
+            "value": "AzureServices"
+        },
+        "networkAclsDefaultAction": {
+            "value": "Allow"
+        },
+        "isBlobSoftDeleteEnabled": {
+            "value": true
+        },
+        "blobSoftDeleteRetentionDays": {
+            "value": 7
+        },
+        "isContainerSoftDeleteEnabled": {
+            "value": true
+        },
+        "containerSoftDeleteRetentionDays": {
+            "value": 7
+        }
+    }
+}

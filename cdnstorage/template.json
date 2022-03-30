@@ -1,0 +1,139 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+        {
+            "type": "Microsoft.Cdn/Profiles",
+            "apiVersion": "2021-06-01",
+            "name": "cdnstore",
+            "location": "Global",
+            "tags": {},
+            "sku": {
+                "name": "Standard_AzureFrontDoor"
+            },
+            "properties": {
+                "frontDoorId": null,
+                "originResponseTimeoutSeconds": 60
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/Profiles/AfdEndpoints",
+            "apiVersion": "2021-06-01",
+            "name": "cdnstore/cdnendpoint01",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles', 'cdnstore')]"
+            ],
+            "properties": {
+                "hostName": "cdnendpoint01.z01.azurefd.net",
+                "enabledState": "Enabled",
+                "deploymentStatus": null
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/Profiles/OriginGroups",
+            "apiVersion": "2021-06-01",
+            "name": "cdnstore/default-origin-group",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles', 'cdnstore')]"
+            ],
+            "properties": {
+                "loadBalancingSettings": {
+                    "sampleSize": 4,
+                    "successfulSamplesRequired": 3,
+                    "additionalLatencyInMilliseconds": 50
+                },
+                "healthProbeSettings": {
+                    "probePath": "/",
+                    "probeRequestType": "HEAD",
+                    "probeProtocol": "Http",
+                    "probeIntervalInSeconds": 100
+                },
+                "trafficRestorationTimeToHealedOrNewEndpointsInMinutes": null,
+                "sessionAffinityState": "Disabled",
+                "deploymentStatus": null
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/Profiles/OriginGroups/Origins",
+            "apiVersion": "2021-06-01",
+            "name": "cdnstore/default-origin-group/default-origin",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles/OriginGroups', 'cdnstore', 'default-origin-group')]"
+            ],
+            "properties": {
+                "hostName": "storageaccountabc01.blob.core.windows.net",
+                "httpPort": 80,
+                "httpsPort": 443,
+                "originHostHeader": "storageaccountabc01.blob.core.windows.net",
+                "priority": 1,
+                "weight": 1000,
+                "enforceCertificateNameCheck": true,
+                "sharedPrivateLinkResource": null,
+                "enabledState": "Enabled",
+                "deploymentStatus": null
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/Profiles/SecurityPolicies",
+            "apiVersion": "2021-06-01",
+            "name": "cdnstore/cdnf2-24c044e4",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles', 'cdnstore')]",
+                "[resourceId('Microsoft.Cdn/Profiles/AfdEndpoints', 'cdnstore', 'cdnendpoint01')]"
+            ],
+            "properties": {
+                "parameters": {
+                    "type": "WebApplicationFirewall",
+                    "wafPolicy": {
+                        "id": "/subscriptions/20b56d55-e4e1-4b6d-8852-5d3d7c31dd96/resourcegroups/Dev-rg20/providers/Microsoft.Network/frontdoorwebapplicationfirewallpolicies/cdnf2"
+                    },
+                    "associations": [
+                        {
+                            "domains": [
+                                {
+                                    "id": "/subscriptions/20b56d55-e4e1-4b6d-8852-5d3d7c31dd96/resourceGroups/Dev-rg20/providers/Microsoft.Cdn/profiles/cdnstore/afdEndpoints/cdnendpoint01"
+                                }
+                            ],
+                            "patternsToMatch": [
+                                "/*"
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Cdn/Profiles/AfdEndpoints/Routes",
+            "apiVersion": "2021-06-01",
+            "name": "cdnstore/cdnendpoint01/default-route",
+            "dependsOn": [
+                "[resourceId('Microsoft.Cdn/Profiles/AfdEndpoints', 'cdnstore', 'cdnendpoint01')]",
+                "[resourceId('Microsoft.Cdn/Profiles/OriginGroups', 'cdnstore', 'default-origin-group')]",
+                "[resourceId('Microsoft.Cdn/Profiles/OriginGroups/Origins', 'cdnstore', 'default-origin-group', 'default-origin')]"
+            ],
+            "properties": {
+                "customDomains": [],
+                "originGroup": {
+                    "id": "/subscriptions/20b56d55-e4e1-4b6d-8852-5d3d7c31dd96/resourceGroups/Dev-rg20/providers/Microsoft.Cdn/profiles/cdnstore/originGroups/default-origin-group"
+                },
+                "originPath": null,
+                "ruleSets": [],
+                "supportedProtocols": [
+                    "Http",
+                    "Https"
+                ],
+                "patternsToMatch": [
+                    "/*"
+                ],
+                "forwardingProtocol": "MatchRequest",
+                "linkToDefaultDomain": "Enabled",
+                "httpsRedirect": "Enabled",
+                "enabledState": "Enabled",
+                "deploymentStatus": null,
+                "provisioningState": null,
+                "cacheConfiguration": null
+            }
+        }
+    ]
+}
